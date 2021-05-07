@@ -10,5 +10,3 @@ chmod +x Rapid7Setup-Linux64.bin
 #python create-se.py
 
 #ip = curl -X GET 
-
-top  
