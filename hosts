@@ -1,10 +1,8 @@
 [linux]
 # linux hosts
-5.135.137.79  # thp
-#51.210.3.140  # ahmed server
-
+...
 
 [windows]
 # Windows hosts !
-# no hosts for now !
+...
 
