@@ -1,0 +1,10 @@
+version: "3.0"
+services:
+   sonde:
+      build: .
+      name: "nexp-se"
+      ports:
+         - 40814:40814
+      #volumes:
+      #   - 
+      image: med97ch/nexp-se

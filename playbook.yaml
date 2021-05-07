@@ -1,0 +1,124 @@
+---
+- name: install docker on linux hosts
+  hosts: linux
+  become: true
+  vars_files:
+    - ./default.yml
+
+  tasks:
+    - name: Install aptitude using apt
+      apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=latest update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu bionic stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+
+#    - name: Pull default Docker image
+#      docker_image:
+#        name: "{{ default_container_image }}"
+#        source: pull
+
+    # Creates the number of containers defined by the variable create_containers, using values from vars file
+#    - name: Create default containers
+#      docker_container:
+#        name: "{{ default_container_name }}{{ item }}"
+#        image: "{{ default_container_image }}"
+#        command: "{{ default_container_command }}"
+#        state: present
+#      with_sequence: count={{ create_containers }}
+
+
+- name: install scan engine
+  hosts: linux
+  remote_user: chemlali
+  become: true
+#  become_methode: sudo 
+#  become_user: root
+  
+  tasks:
+#     - name: pull an image
+#       docker_image:
+#          name: med97ch/nexp-scan
+#          source: pull
+
+     - name: copy the dockerfile
+       copy:
+          src: ./Dockerfile
+          dest: ./Dockerfile
+          owner: root
+          group: root
+          mode: 750
+
+     - name: Build image 
+       community.docker.docker_image:
+          name: nexp-test
+          build:
+             path: ./
+             args:
+                listen_port: 40814
+          source: build
+          
+     - name: create the container
+       community.docker.docker_container:
+          name: scane-engine
+          image: nexp-test
+          volumes:
+          exposed_ports:
+             - 40814
+ 
+     - name: copy the connection's configuration file
+       copy:
+          src: ./connection.conf
+          dest: ./connection.conf
+          owner: root
+          group: root
+          mode: 750
+
+#     - name: copy the pairing script
+#       copy:
+#          src: ./create-scan.py
+#          dest: ./create-scan.py
+#          owner: root
+#          group: root
+#          mode: 750
+
+
+- name: install docker on windows hosts
+  hosts: windows
+
+  tasks:
+  - name: Check the minimum Windows build number
+    include_tasks: check-build-number.yml
+    tags: check
+
+  - name: Install Windows Containers and Hyper-V Windows Features (if not already present)
+    include_tasks: install-windows-container-features.yml
+    tags: dockerinstall
+
+  - name: Install Docker on Windows (always the newest version) and pull needed base images
+    include_tasks: install-docker.yml
+    tags: dockerinstall
+
+  - name: Install Docker Compose (also always the newest version)
+    include_tasks: install-docker-compose.yml
+    tags: dockerinstall
+
+  - name: Run a Microsoft Docker Windows Testcontainer
+    include_tasks: run-test-container.yml
