@@ -49,9 +49,9 @@
   hosts: linux
   remote_user: chemlali
   become: true
-#  become_methode: sudo 
+#  become_methode: sudo
 #  become_user: root
-  
+
   tasks:
 #     - name: pull an image
 #       docker_image:
@@ -66,7 +66,7 @@
           group: root
           mode: 750
 
-     - name: Build image 
+     - name: Build image
        community.docker.docker_image:
           name: nexp-test
           build:
@@ -74,7 +74,7 @@
              args:
                 listen_port: 40814
           source: build
-          
+
      - name: create the container
        community.docker.docker_container:
           name: scane-engine
@@ -82,7 +82,7 @@
           volumes:
           exposed_ports:
              - 40814
- 
+
      - name: copy the connection's configuration file
        copy:
           src: ./connection.conf
@@ -100,7 +100,7 @@
 #          mode: 750
 
 
-- name: install docker on windows hosts
+- name: install docker on windows hosts and pull the needed images
   hosts: windows
 
   tasks:
@@ -122,3 +122,6 @@
 
   - name: Run a Microsoft Docker Windows Testcontainer
     include_tasks: run-test-container.yml
+
+  - name: Run nexpose scan-engine container
+    win_shell: "docker run --name nexpose-scanner med97ch/nexp-se"
