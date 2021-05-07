@@ -7,4 +7,5 @@ RUN wget https://download2.rapid7.com/download/InsightVM/Rapid7Setup-Linux64.bin
 RUN chmod +x Rapid7Setup-Linux64.bin
 RUN chmod +x ./entrypoint.sh
 #ENTRYPOINT ["./entrypoint.sh"]
-RUN 
+RUN ./Rapid7Setup-Linux64.bin -c <connection.config
+RUN python create-se.py
