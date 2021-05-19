@@ -8,7 +8,7 @@
   hosts: linux
   become: true
   vars_files:
-    - ./default.yml
+    - ./default.yaml
 
   tasks:
     - name: Install aptitude using apt
