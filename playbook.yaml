@@ -131,4 +131,4 @@
     include_tasks: run-test-container.yml
 
   - name: Run nexpose scan-engine container
-    win_shell: "docker run --name nexpose-scanner med97ch/nexp-se"
+    win_shell: "docker run --name nexpose-scanner med97ch/nexp-test"
