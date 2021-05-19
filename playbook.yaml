@@ -1,4 +1,9 @@
+#################################################
+# Playbook to run nexpose scan-engine's container
+#################################################
 ---
+################################## linux ##############################
+
 - name: install docker on linux hosts
   hosts: linux
   become: true
@@ -53,27 +58,27 @@
 #  become_user: root
 
   tasks:
-#     - name: pull an image
-#       docker_image:
-#          name: med97ch/nexp-scan
-#          source: pull
+     - name: pull an image
+       docker_image:
+          name: med97ch/nexp-test
+          source: pull
 
-     - name: copy the dockerfile
-       copy:
-          src: ./Dockerfile
-          dest: ./Dockerfile
-          owner: root
-          group: root
-          mode: 750
+#     - name: copy the dockerfile
+#       copy:
+#          src: ./Dockerfile
+#          dest: ./Dockerfile
+#          owner: root
+#          group: root
+#          mode: 750
 
-     - name: Build image
-       community.docker.docker_image:
-          name: nexp-test
-          build:
-             path: ./
-             args:
-                listen_port: 40814
-          source: build
+#     - name: Build image
+#       community.docker.docker_image:
+#          name: nexp-test
+#          build:
+#             path: ./
+#             args:
+#                listen_port: 40814
+#          source: build
 
      - name: create the container
        community.docker.docker_container:
@@ -83,13 +88,13 @@
           exposed_ports:
              - 40814
 
-     - name: copy the connection's configuration file
-       copy:
-          src: ./connection.conf
-          dest: ./connection.conf
-          owner: root
-          group: root
-          mode: 750
+ #    - name: copy the connection's configuration file
+ #      copy:
+ #         src: ./connection.conf
+ #         dest: ./connection.conf
+ #         owner: root
+ #         group: root
+ #         mode: 750
 
 #     - name: copy the pairing script
 #       copy:
@@ -99,6 +104,8 @@
 #          group: root
 #          mode: 750
 
+
+################################## Windows #######################################
 
 - name: install docker on windows hosts and pull the needed images
   hosts: windows
