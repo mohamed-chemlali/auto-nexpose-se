@@ -15,6 +15,8 @@ RUN chmod +x ./pair.sh
 
 # Run the installation file
 RUN ./Rapid7Setup-Linux64.bin -c < install.config
+# Start the engine
+RUN serice nexposeengine start
 
 # paring the SE with console
 RUN bash ./pair.sh
