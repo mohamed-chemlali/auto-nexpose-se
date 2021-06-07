@@ -2,7 +2,10 @@
 # Playbook to run nexpose scan-engine's container
 #################################################
 ---
+
 ################################## linux ##############################
+
+# Install Docker on remote hosts if it's not installed
 
 - name: install docker on linux hosts
   hosts: linux
@@ -31,6 +34,23 @@
     - name: Update apt and install docker-ce
       apt: update_cache=yes name=docker-ce state=latest
 
+    - name: Update apt and install docker-ce-cli
+      apt: update_cache=yes name=docker-ce-cli state=latest
+
+    - name: Update apt and install containerd.io
+      apt: update_cache=yes name=containerd.io state=latest
+
+    - name: make sure that docker was started and enabled
+      service:
+              name: docker
+              state: started
+              enabled: yes
+
+    - name: Install Docker-compose
+      shell: curl -L "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+      ignore_errors: yes
+
+
     - name: Install Docker Module for Python
       pip:
         name: docker
@@ -49,60 +69,23 @@
 #        state: present
 #      with_sequence: count={{ create_containers }}
 
+# Pull the docker image & run the container
 
-- name: install scan engine
-  hosts: linux
-  remote_user: chemlali
-  become: true
-#  become_methode: sudo
-#  become_user: root
 
-  tasks:
-     - name: pull an image
-       docker_image:
-          name: med97ch/nexp-test
-          source: pull
+    - name: pull an image
+      docker_image:
+         name: med97ch/nexp-se
+         source: pull
 
-#     - name: copy the dockerfile
-#       copy:
-#          src: ./Dockerfile
-#          dest: ./Dockerfile
-#          owner: root
-#          group: root
-#          mode: 750
 
-#     - name: Build image
-#       community.docker.docker_image:
-#          name: nexp-test
-#          build:
-#             path: ./
-#             args:
-#                listen_port: 40814
-#          source: build
+    - name: create the container
+      docker_container:
+         name: scane-engine
+         image: med97ch/nexp-se
+#         volumes:
+         exposed_ports:
+            - '40814'
 
-     - name: create the container
-       community.docker.docker_container:
-          name: scane-engine
-          image: nexp-test
-          volumes:
-          exposed_ports:
-             - 40814
-
- #    - name: copy the connection's configuration file
- #      copy:
- #         src: ./connection.conf
- #         dest: ./connection.conf
- #         owner: root
- #         group: root
- #         mode: 750
-
-#     - name: copy the pairing script
-#       copy:
-#          src: ./create-scan.py
-#          dest: ./create-scan.py
-#          owner: root
-#          group: root
-#          mode: 750
 
 
 ################################## Windows #######################################
@@ -131,4 +114,4 @@
     include_tasks: run-test-container.yml
 
   - name: Run nexpose scan-engine container
-    win_shell: "docker run --name nexpose-scanner med97ch/nexp-test"
+    win_shell: "docker run --name nexpose-scanner med97ch/nexp-se"
