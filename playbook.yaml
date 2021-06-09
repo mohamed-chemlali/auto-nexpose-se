@@ -91,11 +91,9 @@
          name: scan-engine
          image: med97ch/nexp-test
          state: present
-         exposed_ports:
-            - '40814'
-         command: service nexposeengine start
          ports:
             - "40814:40814"
+         command: service nexposeengine start
 
      - name: start pairing
        command: docker exec -it scan-engine /bin/bash -l -c /pair.sh
